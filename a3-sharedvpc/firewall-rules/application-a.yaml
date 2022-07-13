@@ -1,0 +1,19 @@
+# web-app-a-egress:
+#   allow:
+#     - ports: [443]
+#       protocol: tcp
+#   direction: EGRESS
+#   destination_ranges:
+#     - 192.168.0.0/24
+#   target_service_accounts:
+#     - myapp@myproject-id.iam.gserviceaccount.com
+# # Myapp ingress
+# web-app-a-ingress:
+#   allow:
+#     - ports: [1234]
+#       protocol: tcp
+#   direction: INGRESS
+#   source_service_accounts:
+#     - frontend-sa@myproject-id.iam.gserviceaccount.com
+#   target_service_accounts:
+#     - web-app-a@myproject-id.iam.gserviceaccount.com

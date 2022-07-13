@@ -1,0 +1,17 @@
+#allow egress
+web-app-a-egress:
+  allow:
+    - ports: []
+      protocol: all
+  direction: EGRESS
+  destination_ranges:
+    - 0.0.0.0/0
+# Myapp ingress
+web-app-a-ingress:
+  allow:
+    - ports: [80]
+      protocol: tcp
+  direction: INGRESS
+  priority: 1000
+  source_ranges:
+  - 0.0.0.0/0
