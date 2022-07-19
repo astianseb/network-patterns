@@ -1,0 +1,53 @@
+########## INGRESS ############
+
+# allow ingress from IAP to all instances in the network
+ext-allow-iap:
+  allow:
+  - ports: []
+    protocol: tcp
+  direction: INGRESS
+  priority: 1001
+  source_ranges:
+  - 35.235.240.0/20
+
+ext-allow-icmp-i:
+  allow:
+  - ports: []
+    protocol: icmp
+  direction: INGRESS
+  priority: 1002
+  source_ranges:
+  - 10.200.1.0/24
+  - 10.200.16.0/24
+
+# deny all ingress
+ext-deny-all:
+  deny:
+  - ports: []
+    protocol: all
+  direction: INGRESS
+  priority: 65534
+  source_ranges:
+  - 0.0.0.0/0
+
+########### EGRESS ############
+
+# allow ICMP
+ext-allow-icmp-e:
+  allow:
+  - ports: []
+    protocol: icmp
+  direction: EGRESS
+  priority: 1001
+  destination_ranges:
+  - 0.0.0.0/0
+
+# deny all egress
+ext-deny-all:
+  deny:
+  - ports: []
+    protocol: all
+  direction: EGRESS
+  priority: 65535
+  destination_ranges:
+  - 0.0.0.0/0

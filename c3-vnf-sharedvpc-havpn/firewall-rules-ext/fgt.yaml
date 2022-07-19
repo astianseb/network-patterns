@@ -1,0 +1,27 @@
+#allow egress
+ext-fgt-egress:
+  allow:
+    - ports: []
+      protocol: all
+  direction: EGRESS
+  destination_ranges:
+    - 0.0.0.0/0
+# fgt ingress for management
+ext-fgt-ingress:
+  allow:
+    - ports: [443]
+      protocol: tcp
+  direction: INGRESS
+  priority: 1005
+  source_ranges:
+  - 0.0.0.0/0
+
+# fgt ingress for port forwarding
+ext-fgt-pf-ingress:
+  allow:
+    - ports: [80,8080]
+      protocol: tcp
+  direction: INGRESS
+  priority: 1006
+  source_ranges:
+  - 10.200.1.0/24
