@@ -101,6 +101,19 @@ module "cloud_nat" {
 
 #----------- Fortigate
 
+# resource "null_resource" "set_fgt_config" {
+#   provisioner "set" {
+#     command = "./fortigate-config/set-variables.sh"
+  
+#   provisioner "set_default" {
+#     when    = destroy
+#     command = "./fortigate-config/set-default.sh"
+#   }
+
+#   }  
+# }
+
+
 
 module "fortigate" {
   project = module.project_hub_host.project_id
@@ -109,6 +122,8 @@ module "fortigate" {
   user_data = "./fortigate-config/config.txt"
   public_subnet_name = module.vpc_external.subnets["${var.region}/ext-subnet-1"].self_link
   private_subnet_name = module.vpc_internal.subnets["${var.region}/int-subnet-1"].self_link
+  int_ip = var.fortigate_int_ip
+  ext_ip = var.fortigate_ext_ip
 
 }
 
@@ -177,7 +192,10 @@ module "host_spot_vm_example" {
     network    = module.vpc_internal.self_link
     subnetwork = module.vpc_internal.subnets["${var.region}/int-subnet-1"].self_link
     nat        = false
-    addresses  = null
+    addresses  = {
+      internal = "10.10.1.100"
+      external = null
+    }
   }]
   service_account_create = true
   metadata = {

@@ -31,6 +31,17 @@ variable "machine" {
 variable "public_subnet_name" {
   type    = string
 }
+
+# Ext IP
+variable "ext_ip" {
+  type = string
+}
+
+# Int IP
+variable "int_ip" {
+  type = string
+}
+
 # Private Subnet name
 variable "private_subnet_name" {
   type    = string

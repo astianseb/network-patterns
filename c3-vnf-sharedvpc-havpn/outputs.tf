@@ -36,11 +36,20 @@ output "FortiGate-InstanceName" {
   
 }
 
-output "namFortiGate-Username" {
+output "FortiGate-Username" {
   value = module.fortigate.FortiGate-Username
 }
 
 output "FortiGate-Password" {
   value = module.fortigate.FortiGate-Password
   
+}
+
+output "FortiGate-intIP" {
+  value = module.fortigate.FortiGAte-intIP
+  
+}
+
+output "FortiGate-extIP" {
+  value = module.fortigate.FortiGate-extIP
 }

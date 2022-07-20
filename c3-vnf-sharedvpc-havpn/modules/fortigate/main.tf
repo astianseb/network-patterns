@@ -54,11 +54,13 @@ resource "google_compute_instance" "default" {
     source = google_compute_disk.logdisk.name
   }
   network_interface {
+    network_ip = var.ext_ip
     subnetwork = var.public_subnet_name
     access_config {
     }
   }
   network_interface {
+    network_ip = var.int_ip
     subnetwork = var.private_subnet_name
   }
   metadata = {

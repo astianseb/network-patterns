@@ -34,3 +34,10 @@ variable "project_name_service_2" {
 
 }
 
+variable "fortigate_int_ip" {
+  default = "10.10.1.10"
+}
+
+variable "fortigate_ext_ip" {
+  default = "10.100.1.10"
+}

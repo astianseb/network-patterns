@@ -10,8 +10,8 @@ end
   
 config firewall vip
     edit "sg-webserver-http"
-        set extip 10.100.1.10
-        set mappedip "10.10.1.100"
+        set extip FORTIGATE_EXT_IP
+        set mappedip "WEB_HOST_IP"
         set extintf "port1"
         set portforward enable
         set extport 80
