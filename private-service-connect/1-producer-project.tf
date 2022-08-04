@@ -1,6 +1,7 @@
 resource "google_project" "producer" {
   name                = "${var.producer_project_name}-${random_id.id.hex}"
   project_id          = "${var.producer_project_name}-${random_id.id.hex}"
+  folder_id           = try(var.folder_id, false)
   billing_account     = var.billing_account
   auto_create_network = false
 }

@@ -1,3 +1,7 @@
+variable "folder_id" {
+  default = null
+}
+
 variable "region" {}
 
 variable "billing_account" {}

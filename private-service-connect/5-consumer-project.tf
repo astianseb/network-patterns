@@ -2,6 +2,7 @@ resource "google_project" "consumer" {
   name                = "${var.consumer_project_name}-${random_id.id.hex}"
   project_id          = "${var.consumer_project_name}-${random_id.id.hex}"
   billing_account     = var.billing_account
+  folder_id           = try(var.folder_id, false)
   auto_create_network = false
 }
 
