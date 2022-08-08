@@ -4,6 +4,12 @@ variable "billing_account" {
 
 }
 
+variable "parent" {
+  default = "organizations/1098571864372"
+  description = "format: organizations/<orgid> or folders/<folderid>"
+  
+}
+
 variable "region" {
   default = "europe-west1"
 }

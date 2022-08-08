@@ -3,7 +3,7 @@ module "project_onprem" {
   billing_account = var.billing_account
   name            = "${var.project_name_onprem}-${random_id.project_id.hex}"
   prefix          = "sg"
-  parent          = "organizations/1098571864372"
+  parent          = var.parent
   services = [
     "compute.googleapis.com",
     "iap.googleapis.com"
