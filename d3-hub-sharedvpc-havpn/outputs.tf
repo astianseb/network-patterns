@@ -30,3 +30,11 @@ EOT
 
 }
 
+output "how_to_test" {
+  value = <<EOT
+  1. log into "onprem VM"
+  2. issue curl command to "host VM IP": curl http://${module.host_spot_vm_example.internal_ip}
+  3. you may run curl in a loop: "while true; do curl http://${module.host_spot_vm_example.internal_ip}; sleep 10; done
+EOT  
+}
+
