@@ -1,3 +1,12 @@
+output "how_to_test" {
+  value = <<EOT
+  1. log into "onprem VM"
+  2. issue curl command to Fortigate EXT IP: curl http://${module.fortigate.FortiGAte-intIP}
+  3. you may run curl in a loop: "while true; do curl http://${module.fortigate.FortiGAte-intIP}; sleep 10; done
+EOT  
+}
+
+
 output "project_id" {
   value = module.project_hub_host.project_id
 }
