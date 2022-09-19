@@ -1,8 +1,8 @@
 output "how_to_test" {
   value = <<EOT
   1. log into "onprem VM"
-  2. issue curl command to Fortigate EXT IP: curl http://${module.fortigate.FortiGAte-extIP}
-  3. you may run curl in a loop: "while true; do curl http://${module.fortigate.FortiGAte-extIP}; sleep 10; done
+  2. issue curl command to Fortigate EXT IP: curl http://${module.fortigate.FortiGate-extIP}
+  3. you may run curl in a loop: "while true; do curl http://${module.fortigate.FortiGate-extIP}; sleep 10; done
 EOT  
 }
 
