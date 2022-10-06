@@ -1,3 +1,35 @@
+#Subnetwok and FW rule ne
+
+resource "google_compute_subnetwork" "proxy_only" {
+  name          = "proxy-only-subnet"
+  ip_cidr_range = "192.168.100.0/24"
+  project   = google_project.gke.project_id
+  region        = var.region
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  role          = "ACTIVE"
+  network       = google_compute_network.gke_vpc_network.id
+}
+
+# Firewall rule to allow traffic from Envoy to forwarding 
+# rule created by Ingress object
+resource "google_compute_firewall" "allow_proxy_connection" {
+  name      = "allow-proxy-connection"
+  project   = google_project.gke.project_id
+  network   = google_compute_network.gke_vpc_network.name
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+#    ports    = ["80"]
+
+  }
+
+  source_ranges = [
+    "192.168.100.0/24"]
+}
+
+
+
 module "cluster_1" {
   source                    = "./modules/gke-cluster"
   project_id                = google_project.gke.project_id
