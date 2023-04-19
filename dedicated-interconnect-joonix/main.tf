@@ -178,129 +178,55 @@ resource "google_compute_router_peer" "sg_peer_2" {
 }
 
 
+resource "google_compute_instance" "vm_a" {
+  name         = "vm-a"
+  machine_type = "e2-medium"
+  zone         = "us-west2-a"
 
-# module "vlan-attachment-1" {
-#   source      = "./modules/net-interconnect-attachment-direct"
-#   project_id  = var.dedicated_ic_project_id
-#   region      = "us-west2"
-#   router_name = "ic-router-1"
-#   router_config = {
-#     description = ""
-#     asn         = local.asn
-#     advertise_config = {
-#       groups = ["ALL_SUBNETS"]
-#       ip_ranges = {
-#         "199.36.153.8/30" = "custom"
-#       }
-#       mode = "CUSTOM"
-#     }
-#   }
-#   router_network = google_compute_network.vpc_internal_custom.id
-#   name           = "vlan-${local.vlan_id}-1"
-#   interconnect   = "https://www.googleapis.com/compute/v1/projects/cso-lab-management/global/interconnects/cso-lab-interconnect-1"
+  tags = ["bastion", "internet-egress"]
 
-#   config = {
-#     description   = ""
-#     vlan_id       = local.vlan_id
-#     bandwidth     = "BPS_10G"
-#     admin_enabled = true
-#     mtu           = 1440
-#   }
-#   peer = {
-#       ip_address = local.bgp_ip_address_1
-#       asn        = 65418
-#   }
-#   bgp = {
-#       session_range             = local.bgp_session_range_1
-#       advertised_route_priority = 0
-#       candidate_ip_ranges       = [local.bgp_candidate_ip_ranges_1]
-#   }
-# }
+  boot_disk {
+    initialize_params {
+      image  = "debian-cloud/debian-11"
+      labels = {
+        my_label = "value"
+      }
+    }
+  }
 
-# module "vlan-attachment-2" {
-#   source      = "./modules/net-interconnect-attachment-direct"
-#   project_id  = var.dedicated_ic_project_id
-#   region      = "us-west2"
-#   router_name = "ic-router-2"
-#   router_config = {
-#     description = ""
-#     asn         = local.asn
-#     advertise_config = {
-#       groups = ["ALL_SUBNETS"]
-#       ip_ranges = {
-#         "199.36.153.8/30" = "custom"
-#       }
-#       mode = "CUSTOM"
-#     }
+  network_interface {
+    network    = google_compute_network.vpc_internal_custom.self_link
+    subnetwork = google_compute_subnetwork.subnet_a.self_link
 
-#   }
-#   router_network = google_compute_network.vpc_internal_custom.id
-#   name           = "vlan-${local.vlan_id}-2"
+  }
 
-#   interconnect   = "https://www.googleapis.com/compute/v1/projects/cso-lab-management/global/interconnects/cso-lab-interconnect-2"
+  scheduling {
+    preemptible       = true
+    automatic_restart = false
+  }
 
-#   config = {
-#     description   = ""
-#     vlan_id       = local.vlan_id
-#     bandwidth     = "BPS_10G"
-#     admin_enabled = true
-#     mtu           = 1440
-#   }
-#   peer = {
-#     ip_address = local.bgp_ip_address_2
-#     asn        = 65418
-#   }
-#   bgp = {
-#     session_range             = local.bgp_session_range_2
-#     advertised_route_priority = 0
-#     candidate_ip_ranges       = [local.bgp_candidate_ip_ranges_2]
-#   }
-# }
+  metadata = {
+    enable-oslogin = true
+  }
+
+  metadata_startup_script = "echo hi > /test.txt"
+
+}
 
 
+resource "google_compute_firewall" "vm_a" {
+  name    = "vm-a-allow-ssh"
+  network = google_compute_network.vpc_internal_custom.self_link
 
+  allow {
+    protocol = "icmp"
+  }
 
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
 
-# module "vm_a" {
-#   source        = "./modules/compute-vm"
-#   project_id    = var.dedicated_ic_project_id
-#   zone          = "us-west2-a"
-#   name          = "vm-a"
-#    options = {
-#     allow_stopping_for_update = true
-#     deletion_protection       = false
-#     spot                      = true
-#     termination_action        = "STOP"    
-#   }
-#   network_interfaces = [{
-#     network    = google_compute_network.vpc_internal_custom.self_link
-#     subnetwork = google_compute_subnetwork.subnet_a.self_link
-#     nat        = false
-#     addresses  = null
-#   }]
-#   service_account_create = true
-#   metadata = {
-#     enable-oslogin = true
-#   }
-#   tags = [
-#       "bastion",
-#       "internet-egress"
-#   ]
-# }
-
-# resource "google_compute_firewall" "vm_a" {
-#   name    = "bastion-allow-ssh"
-#   network = google_compute_network.vpc_internal_custom.self_link
-
-#   allow {
-#     protocol = "icmp"
-#   }
-
-#   allow {
-#     protocol = "tcp"
-#     ports    = ["22"]
-#   }
-
-#   source_tags = ["bastion"]
-# }
+  source_tags = ["bastion"]
+}
 
