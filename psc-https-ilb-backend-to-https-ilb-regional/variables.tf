@@ -1,0 +1,28 @@
+variable "folder_id" {
+  default = null
+}
+
+variable "region" {}
+
+variable "billing_account" {}
+
+variable "producer_project_name" {
+  default = "producer"
+}
+
+variable "consumer_project_name" {
+  default = "consumer"
+}
+
+#### VARIABLES TO WORK ON JOONIX ####
+
+variable "producer_project_id" {
+  default = ""
+}
+
+variable "consumer_project_id" {
+  default = ""
+}
+
+
+
