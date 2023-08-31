@@ -1,0 +1,130 @@
+me_sebastiang_eu@vm-a:~$ curl -vvv --proxy-insecure -x https://10.1.10.100 --insecure https://www.onet.pl/index.html | more
+*   Trying 10.1.10.100:443...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Connected to 10.1.10.100 (10.1.10.100) port 443 (#0)
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [21 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [825 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN, server accepted to use http/1.1
+* Proxy certificate:
+*  subject: O=SG Test; CN=sg-test.com
+*  start date: Aug 30 11:24:39 2023 GMT
+*  expire date: Sep  1 11:24:39 2023 GMT
+*  issuer: O=SG Test; CN=sg-test.com
+*  SSL certificate verify result: self signed certificate (18), continuing anyway.
+* allocate connect buffer!
+* Establish HTTP proxy tunnel to www.onet.pl:443
+} [5 bytes data]
+> CONNECT www.onet.pl:443 HTTP/1.1
+> Host: www.onet.pl:443
+> User-Agent: curl/7.74.0
+> Proxy-Connection: Keep-Alive
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [36 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [36 bytes data]
+< HTTP/1.1 200 OK
+< date: Wed, 30 Aug 2023 13:52:12 GMT
+< 
+* Proxy replied 200 to CONNECT request
+* CONNECT phase completed!
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+* CONNECT phase completed!
+* CONNECT phase completed!
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [19 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [2095 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [80 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [36 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [36 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: C=PL; ST=Mazowieckie; L=Warszawa; O=Ringier Axel Springer Polska Sp z o.o.; CN=*.onet.pl
+*  start date: Jul 11 00:00:00 2023 GMT
+*  expire date: May 14 23:59:59 2024 GMT
+*  issuer: C=US; O=DigiCert Inc; OU=www.digicert.com; CN=GeoTrust TLS ECC CA G1
+*  SSL certificate verify ok.
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+} [5 bytes data]
+* Using Stream ID: 1 (easy handle 0x55559abbd2c0)
+} [5 bytes data]
+> GET /index.html HTTP/2
+> Host: www.onet.pl
+> user-agent: curl/7.74.0
+> accept: */*
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [124 bytes data]
+* Connection state changed (MAX_CONCURRENT_STREAMS == 128)!
+} [5 bytes data]
+< HTTP/2 404 
+< content-type: text/html; charset=utf-8
+< content-length: 101960
+< server: Ring Publishing - Accelerator
+< date: Wed, 30 Aug 2023 13:52:13 GMT
+< vary: Accept-Encoding
+< cache-control: private
+< x-xss-protection: 1; mode=block
+< x-content-type-options: nosniff
+< access-control-allow-credentials: true
+< access-control-allow-origin: https://www.onet.pl
+< x-app-build: dev-env
+< x-nextjs-cache: HIT
+< x-powered-by: Next.js
+< etag: "101960-76bf29ea278a1496"
+< content-security-policy-report-only: block-all-mixed-content; report-uri https://events.ocdn.eu/v2/csp-report?_ac=events&_fv=www.onet.pl::APROD_3_5_0
+< link: <https://static.onet.pl/_next/static/css/fc7ea88222ccc97a.css>; rel=preload; as=style
+< link: <https://static.onet.pl/_next/static/css/eb0a48e7c1a7c2d6.css>; rel=preload; as=style
+< link: <https://events.ocdn.eu>; rel=preconnect
+< set-cookie: acc_segment=79; Path=/; Max-Age=604800; SameSite=None; Secure
+< vary: user-agent
+< x-cache: Error from cloudfront
+< via: 1.1 6a7dbdb209ec7dcfec16316a2b155e06.cloudfront.net (CloudFront)
+< x-amz-cf-pop: CDG50-C1
+< alt-svc: h3=":443"; ma=86400
+< x-amz-cf-id: rtNxaNtevXVKTRXE_5LzKzyMb05BfHH9gDM9aFq1kSqQq9Pi8xtZ3A==
+< 
+{ [15519 bytes data]
+<!DOCTYPE html><html
