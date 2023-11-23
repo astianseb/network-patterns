@@ -74,6 +74,8 @@ resource "google_compute_firewall" "allow_internal" {
     protocol = "icmp"
   }
   source_ranges = [for index, subnet in local.subnets : subnet.ip_cidr_range]
+
+  disabled = true
 }
 
 
