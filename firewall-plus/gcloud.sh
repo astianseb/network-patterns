@@ -4,7 +4,7 @@
 
 export ORGANIZATION_ID=1098571864372
 export ZONE=europe-west1-b
-export LOCATION=europe-west1data
+export LOCATION=europe-west1
 export PROJECT_ID=sg-firewall-plus-81eaca58
 export IP_RANGES=10.1.10.0/24
 
