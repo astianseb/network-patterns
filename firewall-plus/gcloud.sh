@@ -50,12 +50,13 @@ gcloud beta network-security security-profile-groups create sg-ips-security-grou
   --location global \
   --threat-prevention-profile organizations/$ORGANIZATION_ID/locations/global/securityProfiles/sg-ips-security-profile
 
+
 gcloud beta compute network-firewall-policies rules create 2000 \
     --action apply_security_profile_group \
     --firewall-policy sg-ips-protection \
-    --direction EGRESS \
+    --direction INGRESS \
     --target-secure-tags $ORGANIZATION_ID/security_level/high \
-    --dest-ip-ranges $IP_RANGES \
+    --src-ip-ranges $IP_RANGES \
     --security-profile-group //networksecurity.googleapis.com/organizations/$ORGANIZATION_ID/locations/global/securityProfileGroups/sg-ips-security-group \
     --layer4-configs all \
     --global-firewall-policy \
