@@ -2,6 +2,8 @@
 # - firewall endpoint is already configured (provisioned)
 # CAUTION! Firewall endpoint is zone based hence it needs to be provisioned in the same
 # zone as resources
+# 
+# Firewall policy will be based on TAGS (not network tags)
 
 locals {
   zone-b = "${var.region}-b"
@@ -59,25 +61,39 @@ resource "google_compute_subnetwork" "subnetwork" {
   ip_cidr_range = each.value.ip_cidr_range
 }
 
-resource "google_compute_firewall" "allow_internal" {
-  name    = "allow-internal"
-  project = google_project.project.project_id
-  network = google_compute_network.network.name
-
-  allow {
-    protocol = "tcp"
-  }
-  allow {
-    protocol = "udp"
-  }
-  allow {
-    protocol = "icmp"
-  }
-  source_ranges = [for index, subnet in local.subnets : subnet.ip_cidr_range]
-
-  disabled = true
+resource "google_compute_network_firewall_policy" "internal_policy" {
+  name          = "sg-network-policy"
+  description   = "SG network policy"
+  project       = google_project.project.project_id
 }
 
+resource "google_compute_network_firewall_policy_rule" "internal_communication" {
+  action                  = "allow"
+  description             = "Allow internal networks"
+  direction               = "INGRESS"
+  disabled                = false
+  enable_logging          = true
+  firewall_policy         = google_compute_network_firewall_policy.internal_policy.name
+  priority                = 3000
+  rule_name               = "allow-internal"
+
+  match {
+    src_ip_ranges = [for index, subnet in local.subnets : subnet.ip_cidr_range]
+  
+    layer4_configs {
+      ip_protocol = "all"
+    }
+
+  }
+  project       = google_project.project.project_id
+}
+
+resource "google_compute_network_firewall_policy_association" "internal_communication" {
+  name              = "internal-communication"
+  attachment_target = google_compute_network.network.id
+  firewall_policy   = google_compute_network_firewall_policy.internal_policy.name
+  project           = google_project.project.project_id
+}
 
 resource "google_compute_firewall" "allow_iap" {
   name    = "allow-iap"
@@ -139,6 +155,7 @@ resource "google_compute_network_firewall_policy" "sg_ips_protection" {
   name        = "sg-ips-protection"
   description = "SG IPS scrubbing"
 }  
+
 resource "google_compute_instance" "vm_source" {
   name         = "vm-source"
   project      = google_project.project.project_id

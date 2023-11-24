@@ -4,7 +4,7 @@
 
 export ORGANIZATION_ID=1098571864372
 export ZONE=europe-west1-b
-export LOCATION=europe-west1
+export LOCATION=europe-west1data
 export PROJECT_ID=sg-firewall-plus-81eaca58
 export IP_RANGES=10.1.10.0/24
 
@@ -32,9 +32,6 @@ gcloud beta network-security firewall-endpoint-associations create sg-ips-$NETWO
 # Wait 10 minutes+
 #
 
-
-
-
 gcloud beta network-security firewall-endpoint-associations list \
    --project $PROJECT_ID 
 
@@ -50,10 +47,10 @@ gcloud beta network-security security-profile-groups create sg-ips-security-grou
   --location global \
   --threat-prevention-profile organizations/$ORGANIZATION_ID/locations/global/securityProfiles/sg-ips-security-profile
 
-
 gcloud beta compute network-firewall-policies rules create 2000 \
+    --description "IPS protection" \
     --action apply_security_profile_group \
-    --firewall-policy sg-ips-protection \
+    --firewall-policy sg-network-policy \
     --direction INGRESS \
     --target-secure-tags $ORGANIZATION_ID/security_level/high \
     --src-ip-ranges $IP_RANGES \
@@ -62,19 +59,9 @@ gcloud beta compute network-firewall-policies rules create 2000 \
     --global-firewall-policy \
     --enable-logging
 
-gcloud beta compute network-firewall-policies associations create \
-     --firewall-policy sg-ips-protection \
-     --network sg-custom-net \
-     --global-firewall-policy
-
-
 #Rollback
-gcloud beta compute network-firewall-policies associations delete \
-     --firewall-policy sg-ips-protection \
-     --name network-sg-custom-net \
-     --global-firewall-policy
 gcloud beta compute network-firewall-policies rules delete 2000 \
-     --firewall-policy sg-ips-protection \
+     --firewall-policy sg-network-policy \
      --global-firewall-policy
 gcloud beta network-security security-profile-groups delete sg-ips-security-group \
   --organization $ORGANIZATION_ID 
