@@ -316,20 +316,59 @@ resource "google_network_security_gateway_security_policy" "default" {
   tls_inspection_policy = google_network_security_tls_inspection_policy.default.id
 }
 
-resource "google_network_security_gateway_security_policy_rule" "default" {
-  name                    = "sg-policyrule"
+resource "google_network_security_gateway_security_policy_rule" "sg_onet" {
+  name                    = "sg-onet"
   project                 = google_project.project.project_id
   location                = var.region
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   description             = "Allow onet.pl"
   enabled                 = true  
-  priority                = 1
+  priority                = 10
   session_matcher         = "host() == 'www.onet.pl'"
-  application_matcher     = "request.method == 'POST'"
   tls_inspection_enabled  = true
   basic_profile           = "ALLOW"
 }
 
+resource "google_network_security_gateway_security_policy_rule" "sg_wp" {
+  name                    = "sg-wp"
+  project                 = google_project.project.project_id
+  location                = var.region
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  description             = "Allow wp.pl"
+  enabled                 = true  
+  priority                = 20
+  session_matcher         = "host() == 'www.wp.pl'"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "sg_github" {
+  name                    = "sg-github"
+  project                 = google_project.project.project_id
+  location                = var.region
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  description             = "Allow Github network-patterns"
+  enabled                 = true  
+  priority                = 30
+  session_matcher         = "host() == 'github.com'"
+  application_matcher     = "request.path.matches('astianseb/network-patterns')"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "sg_org_domains" {
+  name                    = "sg-org-domains"
+  project                 = google_project.project.project_id
+  location                = var.region
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  description             = "Allow .org domains"
+  enabled                 = true  
+  priority                = 40
+  session_matcher         = "host().endsWith('org')"
+  application_matcher     = "request.path.matches('index.html')"
+  tls_inspection_enabled  = true
+  basic_profile           = "ALLOW"
+}
 
 ############## SWP GATEWAY ############################################################
 
