@@ -1,6 +1,6 @@
 locals {
   zone-b = "${var.region}-b"
-  zone-c = "${var.region}-c"
+  zone-c = "${var.region2}-c"
   subnets = [
     {
       name          = "sg-subnet-a",
@@ -10,7 +10,7 @@ locals {
     {
       name          = "sg-subnet-b",
       ip_cidr_range = "10.1.11.0/24",
-      region        = var.region
+      region        = var.region2
     }
   ]
 }
@@ -329,18 +329,18 @@ resource "google_network_security_gateway_security_policy_rule" "sg_onet" {
   basic_profile           = "ALLOW"
 }
 
-resource "google_network_security_gateway_security_policy_rule" "sg_wp" {
-  name                    = "sg-wp"
-  project                 = google_project.project.project_id
-  location                = var.region
-  gateway_security_policy = google_network_security_gateway_security_policy.default.name
-  description             = "Allow wp.pl"
-  enabled                 = true  
-  priority                = 20
-  session_matcher         = "host() == 'www.wp.pl'"
-  tls_inspection_enabled  = true
-  basic_profile           = "ALLOW"
-}
+# resource "google_network_security_gateway_security_policy_rule" "sg_wp" {
+#   name                    = "sg-wp"
+#   project                 = google_project.project.project_id
+#   location                = var.region
+#   gateway_security_policy = google_network_security_gateway_security_policy.default.name
+#   description             = "Allow wp.pl"
+#   enabled                 = true  
+#   priority                = 20
+#   session_matcher         = "host() == 'www.wp.pl'"
+#   tls_inspection_enabled  = true
+#   basic_profile           = "ALLOW"
+# }
 
 resource "google_network_security_gateway_security_policy_rule" "sg_github" {
   name                    = "sg-github"
