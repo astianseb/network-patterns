@@ -135,6 +135,12 @@ resource "google_compute_instance" "vm_a" {
     }
   }
 
+  params {
+    resource_manager_tags = {
+      "${google_tags_tag_key.key.id}" = "${google_tags_tag_value.deny_social.id}"
+    }
+  }
+
   network_interface {
     network    = google_compute_network.network.name
     subnetwork = google_compute_subnetwork.subnetwork["sg-subnet-a"].self_link
@@ -369,6 +375,61 @@ resource "google_network_security_gateway_security_policy_rule" "sg_org_domains"
   tls_inspection_enabled  = true
   basic_profile           = "ALLOW"
 }
+
+resource "google_network_security_url_lists" "sg_url_list_1" {
+  name        = "sg-url-list"
+  project     = google_project.project.project_id
+  location    = var.region
+  description = "SG URL list"
+  values = [
+    "*.cnn.com/health/*",
+    "*.cnn.com/business/*",
+    "*.google.com"
+    ]
+}
+
+# resource "google_network_security_gateway_security_policy_rule" "sg_url_list_1" {
+#   name                    = "sg-url-list"
+#   project                 = google_project.project.project_id
+#   location                = var.region
+#   gateway_security_policy = google_network_security_gateway_security_policy.default.name
+#   description             = "SG URL list"
+#   enabled                 = true  
+#   priority                = 50
+#   session_matcher         = "inUrlList(host(), '${google_network_security_url_lists.sg_url_list_1.id}')"
+#   tls_inspection_enabled  = true
+#   basic_profile           = "ALLOW"
+# }
+
+
+resource "google_tags_tag_key" "key" {
+    parent = "organizations/${var.parent.parent_id}"
+    short_name = "SWP policy"
+    description = "SG SWP policy"
+}
+
+resource "google_tags_tag_value" "deny_social" {
+    parent = "tagKeys/${google_tags_tag_key.key.name}"
+    short_name = "deny_social_media"
+    description = "Deny social media"
+}
+
+
+# resource "google_network_security_gateway_security_policy_rule" "sg_url_list_1" {
+#   name                    = "sg-url-list"
+#   project                 = google_project.project.project_id
+#   location                = var.region
+#   gateway_security_policy = google_network_security_gateway_security_policy.default.name
+#   description             = "SG URL list"
+#   enabled                 = true  
+#   priority                = 50
+#   session_matcher         = "source.matchTag('${google_tags_tag_value.deny_social.id}')"
+#   application_matcher     = "request.method == 'GET' && inUrlList(request.url(), '${google_network_security_url_lists.sg_url_list_1.id}')"
+#   tls_inspection_enabled  = true
+#   basic_profile           = "ALLOW"
+# }
+
+
 
 ############## SWP GATEWAY ############################################################
 
