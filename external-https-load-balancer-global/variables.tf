@@ -13,9 +13,13 @@ variable "region_a" {}
 
 variable "region_b" {}
 
-variable "billing_account" {}
+#variable "billing_account" {}
 
-variable "producer_project_name" {}
+#variable "producer_project_name" {}
+
+variable "sg_project_id" {}
+
+variable "sg_prefix" {}
 
 
 

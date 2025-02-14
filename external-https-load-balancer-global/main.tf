@@ -14,18 +14,18 @@ resource "random_id" "id" {
 
 ############ PROJECT ###############
 
-resource "google_project" "producer" {
-  org_id              = var.parent.parent_type == "organizations" ? var.parent.parent_id : null
-  folder_id           = var.parent.parent_type == "folders" ? var.parent.parent_id : null
-  name                = "${var.producer_project_name}-${random_id.id.hex}"
-  project_id          = "${var.producer_project_name}-${random_id.id.hex}"
-  billing_account     = var.billing_account
-  auto_create_network = false
-}
-
-# data "google_project" "producer" {
-#     project_id = var.producer_project_id
+# resource "google_project" "producer" {
+#   org_id              = var.parent.parent_type == "organizations" ? var.parent.parent_id : null
+#   folder_id           = var.parent.parent_type == "folders" ? var.parent.parent_id : null
+#   name                = "${var.producer_project_name}-${random_id.id.hex}"
+#   project_id          = "${var.producer_project_name}-${random_id.id.hex}"
+#   billing_account     = var.billing_account
+#   auto_create_network = false
 # }
+
+data "google_project" "producer" {
+    project_id = var.sg_project_id
+}
 
 
 resource "google_project_service" "producer_service" {
@@ -36,17 +36,17 @@ resource "google_project_service" "producer_service" {
   ])
 
   service            = each.key
-  project            = google_project.producer.project_id
+  project            = data.google_project.producer.project_id
   disable_on_destroy = false
 }
 
 ####### VPC NETWORK
 
 resource "google_compute_network" "producer_vpc_network" {
-  name                    = "sg-vpc"
+  name                    = "${var.sg_prefix}-vpc"
   auto_create_subnetworks = false
   mtu                     = 1460
-  project                 = google_project.producer.project_id
+  project                 = data.google_project.producer.project_id
 }
 
 
@@ -54,7 +54,7 @@ resource "google_compute_network" "producer_vpc_network" {
 
 resource "google_compute_subnetwork" "producer_sb_subnet_a" {
   name          = "subnet-a"
-  project       = google_project.producer.project_id
+  project       = data.google_project.producer.project_id
   ip_cidr_range = "10.10.20.0/24"
   network       = google_compute_network.producer_vpc_network.id
   region        = var.region_a
@@ -62,7 +62,7 @@ resource "google_compute_subnetwork" "producer_sb_subnet_a" {
 
 resource "google_compute_subnetwork" "producer_sb_subnet_b" {
   name          = "subnet-b"
-  project       = google_project.producer.project_id
+  project       = data.google_project.producer.project_id
   ip_cidr_range = "10.10.40.0/24"
   network       = google_compute_network.producer_vpc_network.id
   region        = var.region_b
@@ -70,7 +70,7 @@ resource "google_compute_subnetwork" "producer_sb_subnet_b" {
 
 resource "google_compute_subnetwork" "producer_proxy" {
   name          = "l7-proxy-subnet"
-  project       = google_project.producer.project_id
+  project       = data.google_project.producer.project_id
   region        = var.region_a
   ip_cidr_range = "10.10.200.0/24"
   network       = google_compute_network.producer_vpc_network.id
@@ -84,7 +84,7 @@ resource "google_compute_subnetwork" "producer_proxy" {
 
 resource "google_compute_firewall" "producer_fw-allow-internal" {
   name      = "sg-allow-internal"
-  project   = google_project.producer.project_id
+  project   = data.google_project.producer.project_id
   network   = google_compute_network.producer_vpc_network.name
   direction = "INGRESS"
 
@@ -105,7 +105,7 @@ resource "google_compute_firewall" "producer_fw-allow-internal" {
 
 resource "google_compute_firewall" "producer_fw_allow_ssh" {
   name      = "sg-allow-ssh"
-  project   = google_project.producer.project_id
+  project   = data.google_project.producer.project_id
   network   = google_compute_network.producer_vpc_network.name
   direction = "INGRESS"
 
@@ -118,7 +118,7 @@ resource "google_compute_firewall" "producer_fw_allow_ssh" {
 
 resource "google_compute_firewall" "producer_fw_app_allow_http" {
   name      = "sg-app-allow-http"
-  project   = google_project.producer.project_id
+  project   = data.google_project.producer.project_id
   network   = google_compute_network.producer_vpc_network.name
   direction = "INGRESS"
 
@@ -132,7 +132,7 @@ resource "google_compute_firewall" "producer_fw_app_allow_http" {
 
 resource "google_compute_firewall" "producer_fw_app_allow_health_check" {
   name      = "sg-app-allow-health-check"
-  project   = google_project.producer.project_id
+  project   = data.google_project.producer.project_id
   network   = google_compute_network.producer_vpc_network.name
   direction = "INGRESS"
 
@@ -147,7 +147,7 @@ resource "google_compute_firewall" "producer_fw_app_allow_health_check" {
 
 resource "google_compute_router" "producer_router_region_a" {
   name    = "nat-router-region-a"
-  project = google_project.producer.project_id
+  project = data.google_project.producer.project_id
   network = google_compute_network.producer_vpc_network.id
   region  = var.region_a
 
@@ -158,7 +158,7 @@ resource "google_compute_router" "producer_router_region_a" {
 
 resource "google_compute_router_nat" "producer_nat_region_a" {
   name                               = "my-router-nat-region-a"
-  project                            = google_project.producer.project_id
+  project                            = data.google_project.producer.project_id
   router                             = google_compute_router.producer_router_region_a.name
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
@@ -172,7 +172,7 @@ resource "google_compute_router_nat" "producer_nat_region_a" {
 
 resource "google_compute_router" "producer_router_region_b" {
   name    = "nat-router-region-b"
-  project = google_project.producer.project_id
+  project = data.google_project.producer.project_id
   network = google_compute_network.producer_vpc_network.id
   region  = var.region_b
 
@@ -183,7 +183,7 @@ resource "google_compute_router" "producer_router_region_b" {
 
 resource "google_compute_router_nat" "producer_nat_region_b" {
   name                               = "my-router-nat-region-b"
-  project                            = google_project.producer.project_id
+  project                            = data.google_project.producer.project_id
   router                             = google_compute_router.producer_router_region_b.name
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
@@ -231,8 +231,8 @@ resource "tls_self_signed_cert" "producer" {
 }
 
 resource "google_compute_ssl_certificate" "producer" {
-  project     = google_project.producer.project_id
-  name_prefix = "my-certificate-"
+  project     = data.google_project.producer.project_id
+  name_prefix = "${var.sg_prefix}-cert-"
   private_key = tls_private_key.producer.private_key_pem
   certificate = tls_self_signed_cert.producer.cert_pem
   lifecycle {
@@ -241,8 +241,8 @@ resource "google_compute_ssl_certificate" "producer" {
 }
 
 resource "google_compute_health_check" "tcp_health_check" {
-  name               = "tcp-hc"
-  project            = google_project.producer.project_id
+  name               = "${var.sg_prefix}-tcp-hc"
+  project            = data.google_project.producer.project_id
   timeout_sec        = 1
   check_interval_sec = 1
 
@@ -254,9 +254,9 @@ resource "google_compute_health_check" "tcp_health_check" {
 
 // ------------- Instance Group A
 resource "google_compute_instance_template" "tmpl_instance_group_1" {
-  name                 = "instance-group-1"
-  project              = google_project.producer.project_id
-  description          = "SG instance group of preemptible hosts"
+  name                 = "${var.sg_prefix}-ig-1"
+  project              = data.google_project.producer.project_id
+  description          = "SG instance group of non-preemptible hosts"
   instance_description = "description assigned to instances"
   machine_type         = "e2-medium"
   can_ip_forward       = false
@@ -264,7 +264,7 @@ resource "google_compute_instance_template" "tmpl_instance_group_1" {
   region               = var.region_a 
 
   scheduling {
-    preemptible       = true
+    preemptible       = false
     automatic_restart = false
 
   }
@@ -277,7 +277,7 @@ resource "google_compute_instance_template" "tmpl_instance_group_1" {
 
   // Create a new boot disk from an image
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-11"
     auto_delete  = true
     boot         = true
   }
@@ -285,19 +285,23 @@ resource "google_compute_instance_template" "tmpl_instance_group_1" {
   network_interface {
     network            = google_compute_network.producer_vpc_network.name
     subnetwork         = google_compute_subnetwork.producer_sb_subnet_a.name
-    subnetwork_project = google_project.producer.project_id
+    subnetwork_project = data.google_project.producer.project_id
+    access_config {
+      // Ephemeral public IP
+    }
   }
 
   metadata = {
-    startup-script-url = "gs://cloud-training/gcpnet/ilb/startup.sh"
+    startup-script-url = "https://raw.githubusercontent.com/astianseb/sg-helper-scripts/refs/heads/main/startup.sh"
+#    startup-script-url = "gs://cloud-training/gcpnet/ilb/startup.sh"
   }
 }
 
 #MIG-a
 resource "google_compute_instance_group_manager" "grp_instance_group_1" {
-  name               = "instance-group-1"
-  project            = google_project.producer.project_id
-  base_instance_name = "mig-a"
+  name               = "${var.sg_prefix}-igm-1"
+  project            = data.google_project.producer.project_id
+  base_instance_name = "${var.sg_prefix}-mig-a"
   zone               = local.zone-a
   version {
     instance_template = google_compute_instance_template.tmpl_instance_group_1.id
@@ -307,11 +311,15 @@ resource "google_compute_instance_group_manager" "grp_instance_group_1" {
     health_check      = google_compute_health_check.tcp_health_check.id
     initial_delay_sec = 300
   }
+  named_port {
+    name = "${var.sg_prefix}-https"
+    port = 443
+  }
 }
 
 resource "google_compute_autoscaler" "obj_my_autoscaler_a" {
-  name    = "my-autoscaler-a"
-  project = google_project.producer.project_id
+  name    = "${var.sg_prefix}-autoscaler-a"
+  project = data.google_project.producer.project_id
   zone    = local.zone-a
   target  = google_compute_instance_group_manager.grp_instance_group_1.id
 
@@ -330,9 +338,9 @@ resource "google_compute_autoscaler" "obj_my_autoscaler_a" {
 //----------------Instance Group B
 
 resource "google_compute_instance_template" "tmpl_instance_group_2" {
-  name                 = "instance-group-2"
-  project              = google_project.producer.project_id
-  description          = "SG instance group of preemptible hosts"
+  name                 = "${var.sg_prefix}-ig-2"
+  project              = data.google_project.producer.project_id
+  description          = "SG instance group of non preemptible hosts"
   instance_description = "description assigned to instances"
   machine_type         = "e2-medium"
   can_ip_forward       = false
@@ -340,7 +348,7 @@ resource "google_compute_instance_template" "tmpl_instance_group_2" {
   region               = var.region_b
 
   scheduling {
-    preemptible       = true
+    preemptible       = false
     automatic_restart = false
 
   }
@@ -352,7 +360,7 @@ resource "google_compute_instance_template" "tmpl_instance_group_2" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-11"
     auto_delete  = true
     boot         = true
   }
@@ -360,18 +368,22 @@ resource "google_compute_instance_template" "tmpl_instance_group_2" {
   network_interface {
     network            = google_compute_network.producer_vpc_network.name
     subnetwork         = google_compute_subnetwork.producer_sb_subnet_b.name
-    subnetwork_project = google_project.producer.project_id
+    subnetwork_project = data.google_project.producer.project_id
+    access_config {
+      // Ephemeral public IP
+    }
   }
 
   metadata = {
-    startup-script-url = "gs://cloud-training/gcpnet/ilb/startup.sh"
+    startup-script-url = "https://raw.githubusercontent.com/astianseb/sg-helper-scripts/refs/heads/main/startup.sh"
+#    startup-script-url = "gs://cloud-training/gcpnet/ilb/startup.sh"
   }
 }
 
 resource "google_compute_instance_group_manager" "grp_instance_group_2" {
-  name               = "instance-group-2"
-  project            = google_project.producer.project_id
-  base_instance_name = "mig-b"
+  name               = "${var.sg_prefix}-igm-2"
+  project            = data.google_project.producer.project_id
+  base_instance_name = "${var.sg_prefix}-mig-b"
   zone               = local.zone-b
   
   version {
@@ -382,11 +394,15 @@ resource "google_compute_instance_group_manager" "grp_instance_group_2" {
     health_check      = google_compute_health_check.tcp_health_check.id
     initial_delay_sec = 300
   }
+  named_port {
+    name = "${var.sg_prefix}-https"
+    port = 443
+  }
 }
 
 resource "google_compute_autoscaler" "obj_my_autoscaler_b" {
-  name    = "my-autoscaler-b"
-  project = google_project.producer.project_id
+  name    = "${var.sg_prefix}-autoscaler-b"
+  project = data.google_project.producer.project_id
   zone    = local.zone-b
   target  = google_compute_instance_group_manager.grp_instance_group_2.id
 
@@ -405,9 +421,9 @@ resource "google_compute_autoscaler" "obj_my_autoscaler_b" {
 
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "app_forwarding_rule" {
-  name                  = "l7-xlb-forwarding-rule"
+  name                  = "${var.sg_prefix}-fr"
   provider              = google-beta
-  project               = google_project.producer.project_id
+  project               = data.google_project.producer.project_id
   ip_protocol           = "TCP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "443"
@@ -417,9 +433,9 @@ resource "google_compute_global_forwarding_rule" "app_forwarding_rule" {
 
 # http proxy
 resource "google_compute_target_https_proxy" "producer" {
-  name     = "l7-xlb-target-http-proxy"
+  name     = "${var.sg_prefix}-https-proxy"
   provider = google-beta
-  project  = google_project.producer.project_id
+  project  = data.google_project.producer.project_id
   url_map  = google_compute_url_map.producer.id
   
   ssl_certificates = [google_compute_ssl_certificate.producer.self_link]
@@ -428,20 +444,22 @@ resource "google_compute_target_https_proxy" "producer" {
 
 # url map
 resource "google_compute_url_map" "producer" {
-  name            = "l7-xlb-url-map"
+  name            = "${var.sg_prefix}-url-map"
   provider        = google-beta
-  project         = google_project.producer.project_id
+  project         = data.google_project.producer.project_id
   default_service = google_compute_backend_service.app_backend.id
 }
 
 
 # HTTP regional load balancer (envoy based)
 resource "google_compute_backend_service" "app_backend" {
-  name                     = "l7-ilb-backend-service"
+  name                     = "${var.sg_prefix}-app-bs"
   provider                 = google-beta
-  project                  = google_project.producer.project_id
-  protocol                 = "HTTP"
-  port_name                = "my-port"
+  project                  = data.google_project.producer.project_id
+#  protocol                 = "HTTP"
+#  port_name                = "my-port"
+  protocol                 = "HTTPS"
+  port_name                = "${var.sg_prefix}-https"
   load_balancing_scheme    = "EXTERNAL_MANAGED"
   timeout_sec              = 10
   health_checks            = [google_compute_health_check.tcp_health_check.id]
@@ -466,16 +484,16 @@ resource "google_compute_backend_service" "app_backend" {
 #
 
 resource "google_compute_instance" "siege_host_region_a" {
-  name         = "siege-host-region-a"
+  name         = "${var.sg_prefix}-siege-reg-a"
   machine_type = "e2-medium"
   zone         = local.zone-a
-  project      = google_project.producer.project_id
+  project      = data.google_project.producer.project_id
 
   tags = ["siege"]
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-11"
     }
   }
 
@@ -513,16 +531,16 @@ resource "google_compute_instance" "siege_host_region_a" {
 
 
 resource "google_compute_instance" "siege_host_region_b" {
-  name         = "siege-host-region-b"
+  name         = "${var.sg_prefix}-siege-reg-b"
   machine_type = "e2-medium"
   zone         = local.zone-b
-  project      = google_project.producer.project_id
+  project      = data.google_project.producer.project_id
 
   tags = ["siege"]
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-10"
+      image = "debian-cloud/debian-11"
     }
   }
 
